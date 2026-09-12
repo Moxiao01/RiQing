@@ -1,6 +1,6 @@
 # 日清（RiQing）
 
-Android 本地优先的日历 / 课表 / 待办 + App 内 Agent。**当前版本：V1.0.0**（见 [Releases](https://github.com/Moxiao01/RiQing/releases)）。
+Android 本地优先的日历 / 课表 / 待办 + App 内 Agent。**当前版本：V1.0.2**（见 [Releases](https://github.com/Moxiao01/RiQing/releases)）。
 
 ## 功能总览（V1.0）
 
