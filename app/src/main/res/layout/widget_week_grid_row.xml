@@ -4,6 +4,8 @@
   根布局 height=0dp weight=1，由 pushWeek 加入 widget_grid 后按行数均分剩余高度；
   行间距改由课程块背景的 inset 提供（连堂块上下贴合、不同块之间留缝），
   minHeight 只作极端情况的兜底。
+  格子只是容器（RemoteViews 不能给单条 TextView 分行限行）：课程块内容
+  （课名/教师/教室，各自限行省略）由运行时塞入 widget_week_cell_course。
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -20,95 +22,53 @@
         android:textSize="9sp"
         android:textColor="@color/widget_text_secondary" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/week_cell1"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginStart="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_on_course"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:layout_marginStart="2dp" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/week_cell2"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginStart="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_on_course"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:layout_marginStart="2dp" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/week_cell3"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginStart="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_on_course"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:layout_marginStart="2dp" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/week_cell4"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginStart="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_on_course"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:layout_marginStart="2dp" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/week_cell5"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginStart="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_on_course"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:layout_marginStart="2dp" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/week_cell6"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginStart="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_on_course"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:layout_marginStart="2dp" />
 
-    <TextView
+    <FrameLayout
         android:id="@+id/week_cell7"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:textColor="@color/widget_on_course"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        android:layout_marginEnd="2dp" />
 </LinearLayout>

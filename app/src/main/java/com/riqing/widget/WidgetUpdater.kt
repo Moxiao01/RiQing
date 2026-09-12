@@ -8,9 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Paint
 import android.os.Build
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.RelativeSizeSpan
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
@@ -171,16 +168,12 @@ object WidgetUpdater {
             // 星期表头行：今天一列用主题色圆角高亮
             views.addView(
                 R.id.widget_day_header,
-                weekRowViews(
+                weekDayHeaderViews(
                     context,
-                    R.layout.widget_week_day_header_row,
-                    gutterText = "",
-                    cells = week.dayLabels.map { label ->
+                    week.dayLabels.map { label ->
                         WidgetWeekCell(label, emptyList(), null, WidgetWeekSegment.SINGLE)
                     },
-                    isDayHeader = true,
-                    todayColumn = week.todayColumn,
-                    textSp = 10f,
+                    week.todayColumn,
                 ),
             )
             // 行数多时缩小字号，保证课名尽量完整显示
@@ -190,55 +183,49 @@ object WidgetUpdater {
                 else -> 8f
             }
             week.rows.forEach { row ->
-                views.addView(
-                    R.id.widget_grid,
-                    weekRowViews(
-                        context,
-                        R.layout.widget_week_grid_row,
-                        gutterText = row.gutterText,
-                        cells = row.cells,
-                        isDayHeader = false,
-                        todayColumn = week.todayColumn,
-                        textSp = textSp,
-                    ),
-                )
+                views.addView(R.id.widget_grid, weekGridRowViews(context, row, week.todayColumn, textSp))
             }
         }
         manager.updateAppWidget(ids, views)
     }
 
-    /**
-     * 网格行：节次号 + 7 列。
-     * 课程块用预置圆角背景：单节四角圆角；连堂块首节上圆角、中段直角贴合、尾节下圆角，
-     * 拼成一个整体圆角矩形；块与块之间靠背景 inset 留出缝隙。
-     * 连堂块内课名/教师/地点三行平铺（详情行缩小字号），单节块只放课名。
-     */
-    private fun weekRowViews(
+    /** 星期表头行：今天一列用主题色圆角高亮。 */
+    private fun weekDayHeaderViews(
         context: Context,
-        layoutRes: Int,
-        gutterText: String,
         cells: List<WidgetWeekCell>,
-        isDayHeader: Boolean,
         todayColumn: Int,
-        textSp: Float,
-    ): RemoteViews = RemoteViews(context.packageName, layoutRes).apply {
-        setTextViewText(R.id.week_gutter, gutterText)
+    ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_week_day_header_row).apply {
+        setTextViewText(R.id.week_gutter, "")
         cells.take(WEEK_CELL_IDS.size).forEachIndexed { index, cell ->
             val cellId = WEEK_CELL_IDS[index]
-            setTextViewTextSize(cellId, TypedValue.COMPLEX_UNIT_SP, textSp)
+            setTextViewText(cellId, cell.name)
+            setInt(cellId, "setMaxLines", 1)
+            if (index == todayColumn) {
+                setInt(cellId, "setBackgroundResource", R.drawable.widget_day_header_today)
+                setTextColor(cellId, context.getColor(R.color.widget_on_accent))
+            } else {
+                setInt(cellId, "setBackgroundResource", 0)
+                setTextColor(cellId, context.getColor(R.color.widget_text_secondary))
+            }
+        }
+    }
+
+    /**
+     * 课程网格行：节次号 + 7 列。
+     * 课程块用预置圆角背景：单节四角圆角；连堂块首节上圆角、中段直角贴合、尾节下圆角，
+     * 拼成一个整体圆角矩形；块与块之间靠背景 inset 留出缝隙。
+     * 格子是容器，课程格里塞入 weekCourseCellViews 分行限行显示课名/教师/教室。
+     */
+    private fun weekGridRowViews(
+        context: Context,
+        row: WidgetWeekRow,
+        todayColumn: Int,
+        textSp: Float,
+    ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_week_grid_row).apply {
+        setTextViewText(R.id.week_gutter, row.gutterText)
+        row.cells.take(WEEK_CELL_IDS.size).forEachIndexed { index, cell ->
+            val cellId = WEEK_CELL_IDS[index]
             when {
-                // 表头行：今天一列圆角高亮
-                isDayHeader -> {
-                    setTextViewText(cellId, cell.name)
-                    setInt(cellId, "setMaxLines", 1)
-                    if (index == todayColumn) {
-                        setInt(cellId, "setBackgroundResource", R.drawable.widget_day_header_today)
-                        setTextColor(cellId, context.getColor(R.color.widget_on_accent))
-                    } else {
-                        setInt(cellId, "setBackgroundResource", 0)
-                        setTextColor(cellId, context.getColor(R.color.widget_text_secondary))
-                    }
-                }
                 // 课程块：圆角背景 + 课名（连堂块带教师/地点详情行）
                 cell.colorToken != null -> {
                     setInt(
@@ -246,48 +233,39 @@ object WidgetUpdater {
                         "setBackgroundResource",
                         courseBlockDrawable(context, cell.colorToken, cell.segment),
                     )
-                    setTextColor(cellId, context.getColor(R.color.widget_on_course))
-                    setTextViewText(cellId, cellText(cell))
-                    setInt(
-                        cellId,
-                        "setMaxLines",
-                        if (cell.segment == WidgetWeekSegment.SINGLE) 2 else MERGED_MAX_LINES,
-                    )
+                    removeAllViews(cellId)
+                    addView(cellId, weekCourseCellViews(context, cell, textSp))
                 }
                 // 今天列的空格子铺一层浅色底，方便竖向对齐扫读
-                index == todayColumn -> {
+                index == todayColumn ->
                     setInt(cellId, "setBackgroundResource", R.drawable.widget_today_tint_cell)
-                    setTextViewText(cellId, "")
-                }
-                else -> {
-                    setInt(cellId, "setBackgroundResource", 0)
-                    setTextViewText(cellId, "")
-                }
+                else -> setInt(cellId, "setBackgroundResource", 0)
             }
         }
     }
 
-    /** 连堂块最多行数：课名 2 行 + 教师、地点各 1 行（超出省略）。 */
-    private const val MERGED_MAX_LINES = 4
-
-    /** 课名/教师/地点三行平铺，详情行缩小到 0.85 倍字号。 */
-    private fun cellText(cell: WidgetWeekCell): CharSequence {
-        if (cell.detailLines.isEmpty()) return cell.name
-        val lines = listOf(cell.name) + cell.detailLines
-        val full = lines.joinToString("\n")
-        return SpannableString(full).apply {
-            var start = cell.name.length + 1
-            for (line in cell.detailLines) {
-                setSpan(
-                    RelativeSizeSpan(0.85f),
-                    start,
-                    start + line.length,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
-                )
-                start += line.length + 1
-            }
+    /**
+     * 课程格内部：课名与教师/教室详情行各占一条 TextView，分别限行并省略——
+     * 课名最多 2 行、详情各 1 行（缩小字号），课名再长也不会折进详情行，
+     * 保证教师/教室始终有固定位置显示。
+     */
+    private fun weekCourseCellViews(
+        context: Context,
+        cell: WidgetWeekCell,
+        textSp: Float,
+    ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_week_cell_course).apply {
+        setTextViewText(R.id.week_cell_name, cell.name)
+        setTextViewTextSize(R.id.week_cell_name, TypedValue.COMPLEX_UNIT_SP, textSp)
+        val detailSize = textSp * DETAIL_TEXT_SCALE
+        cell.detailLines.take(2).forEachIndexed { index, line ->
+            val detailId = if (index == 0) R.id.week_cell_detail1 else R.id.week_cell_detail2
+            setTextViewText(detailId, line)
+            setTextViewTextSize(detailId, TypedValue.COMPLEX_UNIT_SP, detailSize)
         }
     }
+
+    /** 详情行（教师/教室）相对课名的字号比例。 */
+    private const val DETAIL_TEXT_SCALE = 0.85f
 
     /** 8 种课程色 × 4 种连堂段位的圆角背景图（c1~c8 之外的颜色回落到 c1）。 */
     private fun courseBlockDrawable(context: Context, token: String, segment: WidgetWeekSegment): Int {
