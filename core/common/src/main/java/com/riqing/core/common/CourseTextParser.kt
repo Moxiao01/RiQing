@@ -9,8 +9,11 @@ package com.riqing.core.common
  *
  * - 星期：周一 / 星期一 / 礼拜一，一行可写多个（星期一、星期三）。
  * - 节次：1-2节 / 第1-2节 / 3节。
- * - 周次：1-16周 / 第1-16周 / 1,3,5周 / 1-8周,10-16周；可带（单周）（双周）。
- * - 剩余词按启发式识别：教室含「楼/馆/场/室」等或形如「数字-数字」，纯汉字 2-4 字的第二个词识别为教师。
+ * - 周次：1-16周 / 第1-16周 / 1,3,5周 / 1-8周,10-16周 / 3、8、11、14周 / 4-7、9-10、12-13、15-18周；可带（单周）（双周）。
+ * - 其余字段严格按空格切分后逐词识别：教室含「楼/馆/场/室」等、形如「数字-数字」，
+ *   或「WM1103」「WX2106#」这类字母门牌；第一个剩余词是课程名，之后第一个纯汉字词
+ *   （2-4 字，可逗号分隔多个，如「赵永华,贾夏」）识别为教师。
+ * - 词首尾的星号等标记符号会被清掉：「*WM1103」按「WM1103」导入。
  * - 周次与节次相同、其余字段一致的行会合并为一周多节课（weekdays 取并集）。
  * - 未标注周次时 weeksSpec 返回空串，由调用方按整学期补齐。
  */
@@ -36,15 +39,20 @@ object CourseTextParser {
     private val weekdayRegex = Regex("(?:星期|礼拜|周)\\s*([一二三四五六日天])")
     private val periodRangeRegex = Regex("第?\\s*(\\d{1,2})\\s*[-–—~]\\s*(\\d{1,2})\\s*节")
     private val periodSingleRegex = Regex("第?\\s*(\\d{1,2})\\s*节")
-    private val weekRangeRegex = Regex("(\\d{1,2})\\s*[-–—~]\\s*(\\d{1,2})\\s*周")
-    private val weekListRegex = Regex("(\\d{1,2}(?:\\s*[,，]\\s*\\d{1,2})+)\\s*周")
-    private val weekSingleRegex = Regex("(\\d{1,2})\\s*周")
     private val biweeklyRegex = Regex("([单双])\\s*周")
-    private val tokenSplitRegex = Regex("[\\s,、/|;；]+")
-    private val cjkNameRegex = Regex("^[\\u4e00-\\u9fa5]{2,4}$")
+
+    /** 一个完整的周次片段：「1-4周」「3、8、11、14周」「4-7、9-10、12-13、15-18周」「1,3,5周」。 */
+    private val weekTokenRegex = Regex(
+        "(\\d{1,2}(?:\\s*[-–—~]\\s*\\d{1,2})?(?:\\s*[,，、]\\s*\\d{1,2}(?:\\s*[-–—~]\\s*\\d{1,2})?)*)\\s*周",
+    )
+    private val weekPartRangeRegex = Regex("^(\\d{1,2})\\s*[-–—~]\\s*(\\d{1,2})$")
+
+    // 严格按空格切分；逗号、顿号等只可能出现在词内部（多教师、周次列表），不作为分割符
+    private val tokenSplitRegex = Regex("\\s+")
+    private val cjkNameRegex = Regex("^[\\u4e00-\\u9fa5]{2,4}(?:[,，][\\u4e00-\\u9fa5]{2,4})*$")
     private val locationHintRegex = Regex("[楼馆场室苑厅廊]")
     private val locationRoomRegex = Regex("\\d+\\s*[-–—]\\s*\\d+")
-    private val locationPlainRoomRegex = Regex("^[A-Za-z]?\\d{3,4}$")
+    private val locationPlainRoomRegex = Regex("^[A-Za-z]{0,4}\\d{3,4}[#$]?$")
 
     /** 一键导入页的示例文本：与解析规则保持同步，测试会校验它可被完整解析。 */
     val SAMPLE: String = listOf(
@@ -57,6 +65,8 @@ object CourseTextParser {
         "体育(篮球) 星期四 5-6节 3-16周(单周) 体育馆 孙洁",
         "程序设计基础(Java) 星期五 3-4节 1-16周 教3-201 周涛",
         "线性代数 星期五 5-6节 9-16周 教1-305 吴静",
+        "大学生心理健康教育 星期三 5-6节 3、8、11、14周 WM1403 郭羽熙",
+        "科技论文写作 星期二 5-6节 9-16周 WX2306 赵永华,贾夏",
     ).joinToString("\n")
 
     fun parse(text: String): ParseResult {
@@ -151,31 +161,25 @@ object CourseTextParser {
         // 否则「教3-201 周涛」会把「01 周」误判为第 1 周
         fun precededByDigit(m: MatchResult) = m.range.first > 0 && line[m.range.first - 1].isDigit()
 
-        weekRangeRegex.findAll(line).forEach { m ->
+        weekTokenRegex.findAll(line).forEach { m ->
             if (precededByDigit(m)) return@forEach
-            val a = m.groupValues[1].toIntOrNull()
-            val b = m.groupValues[2].toIntOrNull()
-            if (a != null && b != null && a in 1..52 && b in 1..52 && a <= b) {
-                weeks.addAll(a..b)
-                ranges.add(m.range)
+            val before = weeks.size
+            for (part in m.groupValues[1].split(',', ',', '、')) {
+                val p = part.trim()
+                val range = weekPartRangeRegex.find(p)
+                if (range != null) {
+                    val a = range.groupValues[1].toIntOrNull()
+                    val b = range.groupValues[2].toIntOrNull()
+                    if (a != null && b != null && a in 1..52 && b in 1..52 && a <= b) {
+                        weeks.addAll(a..b)
+                    }
+                } else {
+                    val w = p.toIntOrNull()
+                    if (w != null && w in 1..52) weeks.add(w)
+                }
             }
-        }
-        weekListRegex.findAll(line).forEach { m ->
-            if (precededByDigit(m) || ranges.any { overlaps(it, m.range) }) return@forEach
-            val nums = m.groupValues[1].split(',', ',')
-                .mapNotNull { it.trim().toIntOrNull() }
-            if (nums.isNotEmpty() && nums.all { it in 1..52 }) {
-                weeks.addAll(nums)
-                ranges.add(m.range)
-            }
-        }
-        weekSingleRegex.findAll(line).forEach { m ->
-            if (precededByDigit(m) || ranges.any { overlaps(it, m.range) }) return@forEach
-            val w = m.groupValues[1].toIntOrNull()
-            if (w != null && w in 1..52) {
-                weeks.add(w)
-                ranges.add(m.range)
-            }
+            // 只有真的解析出周次才从原文剪掉该片段
+            if (weeks.size > before) ranges.add(m.range)
         }
         return WeeksInfo(if (weeks.isEmpty()) "" else WeeksSpecParser.format(weeks), ranges)
     }
@@ -188,7 +192,10 @@ object CourseTextParser {
         // 剪掉已识别片段后可能残留「(单周)」这类空括号，先清掉；课程名自身的括号要保留
         val rest = cutOut(line, removals.sortedBy { it.first })
             .replace("()", "").replace("[]", "").replace("{}", "")
-        val tokens = rest.split(tokenSplitRegex).filter { it.isNotBlank() }
+        // 严格按空格切分；再清掉词首尾残留的分割标点与星号标记（如「高等数学,星期一」「*WM1103」）
+        val tokens = rest.split(tokenSplitRegex)
+            .map { it.trim(',', '，', '、', '/', '|', ';', '；', '*') }
+            .filter { it.isNotBlank() }
 
         var location: String? = null
         var name: String? = null
@@ -224,9 +231,6 @@ object CourseTextParser {
         sb.append(text, i, text.length)
         return sb.toString()
     }
-
-    private fun overlaps(a: IntRange, b: IntRange): Boolean =
-        a.first <= b.last && b.first <= a.last
 
     /** 同名同教师同教室同节次同周次的行合并为一门课（weekdays 取并集），保持首次出现顺序。 */
     private fun merge(sessions: List<ParsedSession>): List<ParsedSession> {
