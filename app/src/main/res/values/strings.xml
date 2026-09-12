@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">日清</string>
+    <string name="nav_home">今日</string>
+    <string name="nav_calendar">日历</string>
+    <string name="nav_timetable">课表</string>
+    <string name="nav_agent">Agent</string>
+    <string name="nav_me">我的</string>
+</resources>

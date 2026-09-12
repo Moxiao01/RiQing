@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin
+.kotlin/
+
+# 本机构建产物与工作区临时文件
+dist/
+*.log
+.verify/
+
+# OS
+.DS_Store
+Thumbs.db
