@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 桌面小组件用色（深色） -->
+<resources>
+    <color name="widget_bg">#1C1D22</color>
+    <color name="widget_on_surface">#E2E2E6</color>
+    <color name="widget_text_secondary">#A0A3AB</color>
+    <color name="widget_accent">#9FA8DA</color>
+    <color name="widget_on_accent">#1A237E</color>
+    <color name="widget_accent_container">#2A2C4E</color>
+    <color name="widget_on_accent_container">#C5CAE9</color>
+    <color name="widget_divider">#2A2B31</color>
+    <color name="widget_overdue">#F2B8B5</color>
+    <color name="widget_today_tint">#2E9FA8DA</color>
+</resources>

@@ -27,7 +27,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
+import com.riqing.core.designsystem.CompactTopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -64,7 +64,7 @@ fun TodoEditRoute(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CompactTopAppBar(
                 title = { Text(if (state.todoId == null) "新建待办" else "编辑待办") },
                 navigationIcon = { TextButton(onClick = onDone) { Text("取消") } },
                 actions = { TextButton(onClick = { vm.save() }) { Text("保存") } },

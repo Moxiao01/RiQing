@@ -35,7 +35,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
+import com.riqing.core.designsystem.CompactTopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -73,7 +73,7 @@ fun EventEditRoute(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CompactTopAppBar(
                 title = { Text(if (state.eventId == null) "新建日程" else "编辑日程") },
                 navigationIcon = { TextButton(onClick = onDone) { Text("取消") } },
                 actions = {

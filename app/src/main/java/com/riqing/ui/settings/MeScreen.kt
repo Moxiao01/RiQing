@@ -12,25 +12,35 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.riqing.core.designsystem.CompactTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.riqing.core.datastore.ThemeMode
+import com.riqing.core.datastore.toLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeRoute(
+    themeMode: ThemeMode,
     onAi: () -> Unit,
+    onTheme: () -> Unit,
     onSemester: () -> Unit,
     onImport: () -> Unit,
     onNotify: () -> Unit,
 ) {
-    Scaffold(topBar = { TopAppBar(title = { Text("我的") }) }) { padding ->
+    Scaffold(topBar = { CompactTopAppBar(title = { Text("我的") }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             ListItem(
                 headlineContent = { Text("AI 配置") },
                 trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
                 modifier = Modifier.fillMaxWidth().clickable(onClick = onAi),
+            )
+            ListItem(
+                headlineContent = { Text("外观") },
+                supportingContent = { Text("主题：${themeMode.toLabel()}") },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onTheme),
             )
             ListItem(
                 headlineContent = { Text("学期与节次") },

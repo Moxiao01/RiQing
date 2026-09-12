@@ -39,5 +39,70 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- 桌面小组件 -->
+        <receiver
+            android:name=".widget.TodayAgendaWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_agenda_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_today_agenda_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.NextClassWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_next_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_next_class_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.TodoListWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_todo_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_todo_list_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WeekTimetableWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_week_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_week_timetable_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WidgetAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.riqing.action.WIDGET_REFRESH" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".widget.TodoActionReceiver"
+            android:exported="false" />
     </application>
 </manifest>

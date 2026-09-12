@@ -19,7 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.riqing.core.designsystem.CompactTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,7 +45,7 @@ fun AgentRoute(vm: AgentViewModel = hiltViewModel()) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CompactTopAppBar(
                 title = { Text("Agent") },
                 actions = {
                     // 对话已持久化，提供显式清空入口

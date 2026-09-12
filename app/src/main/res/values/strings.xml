@@ -6,4 +6,28 @@
     <string name="nav_timetable">课表</string>
     <string name="nav_agent">Agent</string>
     <string name="nav_me">我的</string>
+
+    <!-- 桌面小组件 -->
+    <string name="widget_agenda_label">今日日程</string>
+    <string name="widget_agenda_desc">今天的课程与日程一览，按课表配色标注</string>
+    <string name="widget_next_label">下节课</string>
+    <string name="widget_next_desc">一眼看到正在进行和下一节课</string>
+    <string name="widget_todo_label">今日待办</string>
+    <string name="widget_todo_desc">在桌面查看并勾选完成今日待办</string>
+    <string name="widget_week_label">本周课表</string>
+    <string name="widget_week_desc">本周课程网格，周一到周日一眼看全</string>
+    <string name="widget_week_no_course">本周没有课</string>
+    <string name="widget_week_not_started">还未开学</string>
+    <string name="widget_week_not_started_hint">开学后这里显示本周课表</string>
+    <string name="widget_loading">加载中…</string>
+    <string name="widget_no_agenda">今天没有安排</string>
+    <string name="widget_no_todo">暂无待办，点此打开日清添加</string>
+    <string name="widget_ongoing">进行中</string>
+    <string name="widget_overdue_tag">已逾期</string>
+    <string name="widget_more_prefix">还有 %1$d 项 · 打开日清</string>
+    <string name="widget_todo_title">今日待办</string>
+    <string name="widget_todo_remaining">未完成 %1$d 项</string>
+    <string name="widget_todo_all_done">已全部完成</string>
+    <string name="widget_next_none">今天没有安排</string>
+    <string name="widget_next_none_action">点此打开日清添加</string>
 </resources>

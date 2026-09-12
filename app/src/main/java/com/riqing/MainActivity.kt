@@ -1,9 +1,11 @@
 package com.riqing
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -19,14 +21,21 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.riqing.core.datastore.AppSettings
+import com.riqing.core.datastore.SettingsDataStore
+import com.riqing.core.datastore.ThemeMode
 import com.riqing.core.designsystem.RiQingTheme
 import com.riqing.ui.agent.AgentRoute
 import com.riqing.ui.calendar.CalendarRoute
@@ -37,11 +46,13 @@ import com.riqing.ui.importer.CourseImportRoute
 import com.riqing.ui.settings.MeRoute
 import com.riqing.ui.settings.SettingsAiRoute
 import com.riqing.ui.settings.SettingsNotifyRoute
+import com.riqing.ui.settings.SettingsThemeRoute
 import com.riqing.ui.settings.SemesterEditRoute
 import com.riqing.ui.settings.SemesterListRoute
 import com.riqing.ui.timetable.TimetableRoute
 import com.riqing.ui.todo.TodoEditRoute
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 sealed class Dest(val route: String) {
     data object Home : Dest("home")
@@ -75,6 +86,7 @@ sealed class Dest(val route: String) {
     }
     data object SettingsAi : Dest("settings_ai")
     data object SettingsNotify : Dest("settings_notify")
+    data object SettingsTheme : Dest("settings_theme")
 }
 
 private data class Tab(val dest: Dest, val label: String, val icon: ImageVector)
@@ -89,19 +101,38 @@ private val tabs = listOf(
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var settingsDataStore: SettingsDataStore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            RiQingTheme {
-                RiQingRoot()
+            val settings by settingsDataStore.settings.collectAsState(initial = AppSettings())
+            val darkTheme = when (settings.themeMode) {
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+            // 手动选主题时状态栏/导航栏图标也要跟着切，否则深色页面上是深色图标
+            val view = LocalView.current
+            if (!view.isInEditMode) {
+                SideEffect {
+                    val window = (view.context as Activity).window
+                    val controller = WindowCompat.getInsetsController(window, view)
+                    controller.isAppearanceLightStatusBars = !darkTheme
+                    controller.isAppearanceLightNavigationBars = !darkTheme
+                }
+            }
+            RiQingTheme(darkTheme = darkTheme) {
+                RiQingRoot(themeMode = settings.themeMode)
             }
         }
     }
 }
 
 @Composable
-fun RiQingRoot() {
+fun RiQingRoot(themeMode: ThemeMode) {
     val nav = rememberNavController()
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
@@ -162,7 +193,9 @@ fun RiQingRoot() {
             composable(Dest.Agent.route) { AgentRoute() }
             composable(Dest.Me.route) {
                 MeRoute(
+                    themeMode = themeMode,
                     onAi = { nav.navigate(Dest.SettingsAi.route) },
+                    onTheme = { nav.navigate(Dest.SettingsTheme.route) },
                     onSemester = { nav.navigate(Dest.SemesterList.route) },
                     onImport = { nav.navigate(Dest.CourseImport.route) },
                     onNotify = { nav.navigate(Dest.SettingsNotify.route) },
@@ -219,6 +252,9 @@ fun RiQingRoot() {
             }
             composable(Dest.SettingsNotify.route) {
                 SettingsNotifyRoute(onDone = { nav.popBackStack() })
+            }
+            composable(Dest.SettingsTheme.route) {
+                SettingsThemeRoute(onDone = { nav.popBackStack() })
             }
         }
     }

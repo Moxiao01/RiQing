@@ -30,7 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.riqing.core.designsystem.CompactTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,7 +56,7 @@ fun CourseEditRoute(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CompactTopAppBar(
                 title = { Text(if (state.courseId == null) "新建课程" else "编辑课程") },
                 navigationIcon = { TextButton(onClick = onDone) { Text("取消") } },
                 actions = { TextButton(onClick = { vm.save() }) { Text("保存") } },

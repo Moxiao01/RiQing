@@ -21,3 +21,9 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# 工作区临时文件与本地签名
+.tmp/
+keystore.properties
+*.keystore
+*.jks

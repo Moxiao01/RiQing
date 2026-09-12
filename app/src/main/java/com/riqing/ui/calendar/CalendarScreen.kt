@@ -34,7 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.riqing.core.designsystem.CompactTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -74,7 +74,7 @@ fun CalendarRoute(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CompactTopAppBar(
                 title = {
                     Text(
                         when (state.mode) {

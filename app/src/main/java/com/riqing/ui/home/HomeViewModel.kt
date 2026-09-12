@@ -48,7 +48,9 @@ class HomeViewModel @Inject constructor(
 
     fun refresh() {
         viewModelScope.launch {
-            _ui.update { it.copy(loading = true) }
+            // 仅首次（尚无数据）显示加载占位；已有数据时静默刷新，
+            // 避免整页换成加载页导致 LazyColumn 销毁重建、滚动位置跳回顶部
+            _ui.update { if (it.agenda == null) it.copy(loading = true) else it }
             val date = LocalDate.now()
             val agenda = agendaRepository.dayAgenda(date)
             val overdue = todoRepository.listOverdue()

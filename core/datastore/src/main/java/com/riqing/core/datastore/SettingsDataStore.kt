@@ -24,6 +24,15 @@ data class AiSettings(
     val enabled: Boolean = false,
 )
 
+/** 应用主题：跟随系统 / 强制浅色 / 强制深色。 */
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+fun ThemeMode.toLabel(): String = when (this) {
+    ThemeMode.SYSTEM -> "跟随系统"
+    ThemeMode.LIGHT -> "浅色"
+    ThemeMode.DARK -> "深色"
+}
+
 data class AppSettings(
     val ai: AiSettings = AiSettings(),
     val weekStartsOnMonday: Boolean = true,
@@ -31,6 +40,7 @@ data class AppSettings(
     val agentPrivacyAck: Boolean = false,
     /** Agent 每次请求携带的最近对话轮数（1 轮 = 用户一条 + 助手回复及工具往返）。 */
     val agentContextTurns: Int = 5,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
 )
 
 class SettingsDataStore(private val context: Context) {
@@ -46,6 +56,7 @@ class SettingsDataStore(private val context: Context) {
         val exactAlarm = booleanPreferencesKey("notify.exactAlarmRequested")
         val privacyAck = booleanPreferencesKey("agent.privacyAck")
         val agentContextTurns = intPreferencesKey("agent.contextTurns")
+        val themeMode = stringPreferencesKey("ui.themeMode")
     }
 
     val settings: Flow<AppSettings> = context.settingsDataStore.data
@@ -66,6 +77,9 @@ class SettingsDataStore(private val context: Context) {
                 exactAlarmRequested = prefs[Keys.exactAlarm] ?: false,
                 agentPrivacyAck = prefs[Keys.privacyAck] ?: false,
                 agentContextTurns = (prefs[Keys.agentContextTurns] ?: 5).coerceIn(1, 20),
+                themeMode = runCatching {
+                    ThemeMode.valueOf(prefs[Keys.themeMode] ?: "SYSTEM")
+                }.getOrDefault(ThemeMode.SYSTEM),
             )
         }
 
@@ -95,6 +109,12 @@ class SettingsDataStore(private val context: Context) {
     suspend fun setExactAlarmRequested(requested: Boolean) {
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.exactAlarm] = requested
+        }
+    }
+
+    suspend fun setThemeMode(mode: ThemeMode) {
+        context.settingsDataStore.edit { prefs ->
+            prefs[Keys.themeMode] = mode.name
         }
     }
 }

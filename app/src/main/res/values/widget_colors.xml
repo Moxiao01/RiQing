@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 桌面小组件用色，与 core/designsystem 主题保持一致（浅色） -->
+<resources>
+    <color name="widget_bg">#FFFFFF</color>
+    <color name="widget_on_surface">#1A1B1F</color>
+    <color name="widget_text_secondary">#70747C</color>
+    <color name="widget_accent">#3F51B5</color>
+    <color name="widget_on_accent">#FFFFFF</color>
+    <color name="widget_accent_container">#E8EAF6</color>
+    <color name="widget_on_accent_container">#1A237E</color>
+    <color name="widget_divider">#EDEFF3</color>
+    <color name="widget_overdue">#B3261E</color>
+    <!-- 课程色块上的文字，明暗主题一致用白色 -->
+    <color name="widget_on_course">#FFFFFF</color>
+    <!-- 本周课表：今天列空格子的浅色底（约 12% 主题色） -->
+    <color name="widget_today_tint">#1F3F51B5</color>
+    <!-- 课程色（90% 不透明度，避免过于鲜艳；明暗主题共用，背景靠 inset 圆角图引用） -->
+    <color name="course_c1">#E63F51B5</color>
+    <color name="course_c2">#E6009688</color>
+    <color name="course_c3">#E6FF7043</color>
+    <color name="course_c4">#E67E57C2</color>
+    <color name="course_c5">#E626A69A</color>
+    <color name="course_c6">#E6EC407A</color>
+    <color name="course_c7">#E6FFA726</color>
+    <color name="course_c8">#E642A5F5</color>
+</resources>

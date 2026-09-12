@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 课程色块 c7 mid：90% 不透明度，段位圆角 + inset 缝隙 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/course_c7"/>
+    <corners android:radius="0dp"/>
+</shape>
